@@ -12,62 +12,53 @@ import memo.model.dto.MemoDTO;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * MemoServlet
- * - GET /memos        : 메모 목록 출력 (list.jsp forward)
- * - GET /memos/new    : 작성 폼 출력 (form.jsp forward)
- * - POST /memos       : 메모 저장 후 목록으로 redirect
- */
 @WebServlet(urlPatterns = {"/memos", "/memos/new"})
 public class MemoServlet extends HttpServlet {
+    private MemoDAO memoDAO; // static? Servlet 매번 새롭게 그 때 그 때...
+    // 생성자?
 
-    private MemoDAO memoDAO;
 
+    // 생명주기 init - ... - destroy
     @Override
     public void init() throws ServletException {
-        // 실제 서비스에서는 DI 컨테이너/팩토리로 주입하겠지만, 여기선 간단히 직접 생성
-        this.memoDAO = new MemoJdbcDAO();
+        this.memoDAO = new MemoJdbcDAO(); // 이후 이 과정이 모두 추상화 예정
     }
 
+    // 인터넷 접속
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        // 폰트 안깨지게
-        resp.setCharacterEncoding("UTF-8");
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 1) /memos
+        // 2) /memos/new
         req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8"); // 인코딩 처리 (폰트 안 깨지게)
 
         String servletPath = req.getServletPath(); // 요청 주소
-        if ("/memos/new".equals(servletPath)) { // == 하지 않기
-            // 작성 폼 - create
-            // forward : 넘겨준다
-            req.getRequestDispatcher("/views/form.jsp").forward(req, resp);
+        if (servletPath.equals("/memos/new")) { // == 하면 안됩니다
+            // 작성 (create)
+            // 파일 경로는 그대로...
+            req.getRequestDispatcher("/WEB-INF/views/form.jsp").forward(req, resp);
             return;
         }
-
         // 목록
-        Long userId = 1L; // 데모용: 로그인 없이 고정 사용자
+        Long userId = 1L; // 1번
         List<MemoDTO> memos = memoDAO.findByUserId(userId, 50, 0);
         req.setAttribute("memos", memos);
-        req.getRequestDispatcher("/views/list.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/list.jsp").forward(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        // POST 본문을 파싱하기 전에 인코딩 지정
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8"); // 인코딩 처리 (폰트 안 깨지게)
 
         String title = req.getParameter("title");
         String content = req.getParameter("content");
 
-        Long userId = 1L; // 데모용 고정 사용자
-        memoDAO.create(userId, title, content);
+        // 검증 생략...
 
-        // PRG 패턴으로 새로고침 중복 제출 방지
-        // req.getContextPath()  -> localhost:port
+        Long userId = 1L;
+        memoDAO.create(userId, title, content);
+        // getContextPath -> [localhost:port/???]
         resp.sendRedirect(req.getContextPath() + "/memos");
     }
 }

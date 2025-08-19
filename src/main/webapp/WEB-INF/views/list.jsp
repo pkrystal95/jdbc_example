@@ -1,22 +1,19 @@
-<!-- ===============================================
-     2) /memo/list.jsp
-     - 서블릿에서 request.setAttribute("memos", List<MemoDTO>) 전달
-     - JSTL 없이 scriptlet으로만 렌더링
-     - 신규 작성 링크 제공
-================================================== -->
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.*,memo.model.dto.MemoDTO" %>
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>메모 목록</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>메모 목록</title>
+</head>
 <body>
   <h2>메모 목록</h2>
-
-  <p><a href="<%= request.{}() %>/memos/new">새 메모 작성</a></p>
-
+  <p>
+    <a href="<%= request.getContextPath() %>/memos/new">새 메모 작성</a>
+  </p>
   <ul>
     <%
-      Object obj = request.{}("memos");
+      Object obj = request.getAttribute("memos");
       if (obj instanceof List) {
           List<?> raw = (List<?>) obj;
           for (Object o : raw) {
@@ -29,7 +26,7 @@
       </li>
     <%
           }
-          if (raw.{}()) {
+          if (raw.isEmpty()) {
     %>
       <li>등록된 메모가 없습니다.</li>
     <%
@@ -42,6 +39,6 @@
     %>
   </ul>
 
-  <p><a href="<%= request.{}() %>/">홈으로</a></p>
+  <p><a href="<%= request.getContextPath() %>/">홈으로</a></p>
 </body>
 </html>

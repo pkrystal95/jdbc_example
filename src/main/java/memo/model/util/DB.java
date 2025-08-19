@@ -13,12 +13,13 @@ public class DB {
     public static final String PASSWORD = dotenv.get("DB_PASSWORD");
 
     public static Connection getConnection() throws SQLException {
-        if (URL == null || USER == null || PASSWORD == null) {
+        if (URL == null ||  USER == null ||  PASSWORD == null) {
             throw new RuntimeException("환경변수 에러 (.env 세팅해주세요!)");
         }
         try {
+            Class.forName("com.mysql.jdbc.Driver");
             return DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.err.println("커넥션 연결 실패");
             System.err.println(e.getMessage());
             throw new SQLException(e);
